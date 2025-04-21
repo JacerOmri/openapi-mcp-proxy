@@ -5,7 +5,7 @@ async function proxyRequest(
   apiServerUrl: string,
   path: string,
   parameters: Record<string, string>,
-): Promise<any> {
+): Promise<unknown> {
   const queryString = new URLSearchParams(parameters).toString();
   const targetUrl = `${apiServerUrl}${path}${queryString ? `?${queryString}` : ""}`;
   const headers = new Headers({
@@ -21,7 +21,7 @@ async function proxyRequest(
 }
 
 export function mapOperationToProxy(apiServerUrl: string, operation: Operation) {
-  return async (params: any) => {
+  return async (params: Record<string, string>) => {
     const pathParams = operation.getParameters().filter((p) => p.in === "path")
     const path = operation.path.replace(
       /{([^}]+)}/g,

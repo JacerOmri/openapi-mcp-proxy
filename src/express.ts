@@ -2,17 +2,20 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import express, { Request, Response } from 'express';
 import { TransportStore } from './transports-store';
+import { createLogger } from './logger';
+
+const logger = createLogger('express');
 
 export function createExpressServer(mcpServer: McpServer): express.Application {
   const app = express();
   app.use(express.json());
-  const transports = new TransportStore()
+  const transports = new TransportStore();
 
   // Store transports by session ID
 
   // SSE endpoint for establishing the stream
   app.get('/mcp', async (req: Request, res: Response) => {
-    console.log('Received GET request to /sse (establishing SSE stream)');
+    logger.info('Received GET request to /sse (establishing SSE stream)');
 
     try {
       // Create a new SSE transport for the client
@@ -25,7 +28,7 @@ export function createExpressServer(mcpServer: McpServer): express.Application {
 
       // Set up onclose handler to clean up transport when closed
       transport.onclose = () => {
-        console.log(`SSE transport closed for session ${sessionId}`);
+        logger.info(`SSE transport closed for session ${sessionId}`);
         transports.remove(sessionId);
       };
 
@@ -36,9 +39,9 @@ export function createExpressServer(mcpServer: McpServer): express.Application {
       // This sends an initial 'endpoint' event with the session ID in the URL
       await transport.start();
 
-      console.log(`Established SSE stream with session ID: ${sessionId}`);
+      logger.info(`Established SSE stream with session ID: ${sessionId}`);
     } catch (error) {
-      console.error('Error establishing SSE stream:', error);
+      logger.error('Error establishing SSE stream:', error);
       if (!res.headersSent) {
         res.status(500).send('Error establishing SSE stream');
       }
@@ -47,30 +50,30 @@ export function createExpressServer(mcpServer: McpServer): express.Application {
 
   // Messages endpoint for receiving client JSON-RPC requests
   app.post('/messages', async (req: Request, res: Response) => {
-    console.log('Received POST request to /messages');
+    logger.debug('Received POST request to /messages');
 
     // Extract session ID from URL query parameter
     // In the SSE protocol, this is added by the client based on the endpoint event
     const sessionId = req.query.sessionId as string | undefined;
 
     if (!sessionId) {
-      console.error('No session ID provided in request URL');
+      logger.error('No session ID provided in request URL');
       res.status(400).send('Missing sessionId parameter');
       return;
     }
 
     const transport = transports.get(sessionId);
     if (!transport) {
-      console.error(`No active transport found for session ID: ${sessionId}`);
+      logger.error(`No active transport found for session ID: ${sessionId}`);
       res.status(404).send('Session not found');
       return;
     }
 
     try {
-      // Handle the POST message with the transport
+      logger.debug({ body: req.body }, 'Processing message');
       await transport.handlePostMessage(req, res, req.body);
     } catch (error) {
-      console.error('Error handling request:', error);
+      logger.error('Error handling request:', error);
       if (!res.headersSent) {
         res.status(500).send('Error handling request');
       }
@@ -79,12 +82,12 @@ export function createExpressServer(mcpServer: McpServer): express.Application {
 
   // Handle server shutdown
   const cleanup = async () => {
-    console.log('Shutting down server...');
+    logger.info('Shutting down server...');
 
     // Close all active transports to properly clean up resources
     transports.clear();
     await mcpServer.close();
-    console.log('Server shutdown complete');
+    logger.info('Server shutdown complete');
   };
 
   process.on('SIGINT', async () => {

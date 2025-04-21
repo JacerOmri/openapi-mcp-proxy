@@ -1,6 +1,7 @@
 
 import OASNormalize from "oas-normalize";
 import Oas from "oas";
+import { OASDocument } from "oas/types";
 
 // Load OpenAPI file
 export async function loadOpenAPIFile(filePath: string) {
@@ -18,7 +19,7 @@ export async function loadOpenAPIFile(filePath: string) {
     { enablePaths: true }
   ).dereference();
 
-  return new Oas(oas as any);
+  return new Oas(oas as OASDocument);
 }
 
 // Extract GET operations from OpenAPI file
