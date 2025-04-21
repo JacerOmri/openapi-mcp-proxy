@@ -1,6 +1,6 @@
 {
   "name": "openapi-mcp-proxy",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "CLI tool to create an MCP server exposing services from an OpenAPI specification",
   "repository": {
     "type": "git",
