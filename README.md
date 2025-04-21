@@ -25,16 +25,16 @@ This enables any existing REST API with an OpenAPI specification to be immediate
 
 ```bash
 # Install globally
-npm install -g openapi-mcp-server
+npm install -g openapi-mcp-proxy
 
 # Or using pnpm
-pnpm add -g openapi-mcp-server
+pnpm add -g openapi-mcp-proxy
 ```
 
 ## Usage
 
 ```bash
-openapi-mcp --spec ./path/to/openapi.yml --target http://your-api.com --port 3000
+npx openapi-mcp-proxy --spec ./path/to/openapi.yml --target http://your-api.com --port 3000
 ```
 
 ### Options
@@ -49,7 +49,7 @@ openapi-mcp --spec ./path/to/openapi.yml --target http://your-api.com --port 300
 
 ```bash
 # Start an MCP server for the Petstore API
-openapi-mcp --spec resources/petstore.openapi.yml --target https://petstore.swagger.io/v2
+npx openapi-mcp-proxy --spec resources/petstore.openapi.yml --target https://petstore.swagger.io/v2
 ```
 
 ### Testing

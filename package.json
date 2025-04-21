@@ -8,7 +8,7 @@
   },
   "main": "dist/cli.js",
   "bin": {
-    "openapi-mcp-prox": "./dist/cli.js"
+    "openapi-mcp-proxy": "./dist/cli.js"
   },
   "scripts": {
     "build": "tsc",

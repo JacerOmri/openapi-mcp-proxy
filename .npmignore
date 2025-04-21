@@ -1,0 +1,24 @@
+# Source files
+src/
+__tests__/
+
+# Configuration files
+.vscode/
+.git/
+.github/
+.gitignore
+.eslintrc*
+.prettierrc*
+*.config.js
+*.config.mjs
+tsconfig*.json
+
+# Development files
+coverage/
+node_modules/
+*.log
+*.tgz
+
+# We want to include only
+!dist/
+!resources/
