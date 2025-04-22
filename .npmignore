@@ -19,6 +19,9 @@ node_modules/
 *.log
 *.tgz
 
+# Documentation
+docs/
+
 # We want to include only
 !dist/
 !resources/

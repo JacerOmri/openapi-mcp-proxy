@@ -1,6 +1,12 @@
-# OpenAPI MCP Server
+# 🤖 OpenAPI MCP Server
+
+[![asciicast](https://asciinema.org/a/716593.svg)](https://asciinema.org/a/716593)
 
 A command-line tool that transforms any OpenAPI service into a Model Context Protocol (MCP) server, enabling seamless integration with AI agents and tools that support the MCP specification.
+
+> [!NOTE]
+> This tool is still in early development stage.
+> Roadmap [is here](https://github.com/users/JacerOmri/projects/1/views/2)
 
 ## What is Model Context Protocol (MCP)?
 
@@ -23,17 +29,13 @@ This enables any existing REST API with an OpenAPI specification to be immediate
 
 ## Installation
 
-```bash
-# Install globally
+```sh
 npm install -g openapi-mcp-proxy
-
-# Or using pnpm
-pnpm add -g openapi-mcp-proxy
 ```
 
 ## Usage
 
-```bash
+```sh
 npx openapi-mcp-proxy --spec ./path/to/openapi.yml --target http://your-api.com --port 3000
 ```
 
@@ -47,8 +49,8 @@ npx openapi-mcp-proxy --spec ./path/to/openapi.yml --target http://your-api.com 
 
 ### Example
 
-```bash
-# Start an MCP server for the Petstore API
+Start an MCP server for the Petstore API
+```sh
 npx openapi-mcp-proxy --spec resources/petstore.openapi.yml --target https://petstore.swagger.io/v2
 ```
 
@@ -58,7 +60,7 @@ npx openapi-mcp-proxy --spec resources/petstore.openapi.yml --target https://pet
 To test your MCP server, you can use the Model Context Protocol:
 
 1. Install the MCP Inspector:
-```bash
+```sh
 npx @modelcontextprotocol/inspector
 ```
 2. Start your MCP server
@@ -87,6 +89,7 @@ for more information on how to use MCP servers with VS code, [see this](https://
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+Roadmap [is here](https://github.com/users/JacerOmri/projects/1/views/2)
 
 ## License
 
