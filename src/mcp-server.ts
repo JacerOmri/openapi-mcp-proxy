@@ -1,20 +1,40 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { jsonSchemaToZod } from "@n8n/json-schema-to-zod";
 import { Operation } from "oas/operation";
-import { ZodRawShape } from "zod";
+import Zod, { ZodRawShape } from "zod";
 import { mapOperationToProxy } from "./proxy";
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { MediaTypeObject } from "oas/types";
+import { JsonSchema, jsonSchemaToZod } from "@n8n/json-schema-to-zod";
 
 function mapOperationToMcp(
   operation: Operation,
 ): [string, string, ZodRawShape] {
+  const parameters = operation.getParameters()
+    .reduce((acc, param) => ({
+      ...acc,
+      [param.name]: jsonSchemaToZod({ ...param, ...param?.schema } as unknown as JsonSchema),
+    }), {} as ZodRawShape)
+
+  const bodyParam = operation.getRequestBody()
+  if (bodyParam) {
+    const bodySchema: MediaTypeObject = Array.isArray(bodyParam) ? bodyParam[1] : bodyParam;
+    if (bodySchema?.schema) {
+      parameters.body = jsonSchemaToZod({ ...bodySchema, ...bodySchema?.schema } as unknown as JsonSchema);
+    }
+  }
+
+  const requestHeaders = operation.getHeaders().request
+    .reduce((acc, param) => ({
+      ...acc,
+      [param]: Zod.string().optional(),
+    }), {} as ZodRawShape)
+
+  parameters.headers = Zod.object(requestHeaders).optional();
+
   return [
     operation.getOperationId(),
     operation.getDescription(),
-    operation.getParameters().reduce((acc, param) => ({
-      ...acc,
-      [param.name]: jsonSchemaToZod(param),
-    }), {}),
+    parameters
   ];
 }
 
@@ -31,6 +51,8 @@ export function createMCPServer(
   operations
     .forEach((operation) => {
       const [operationId, description, parameters] = mapOperationToMcp(operation);
+      const proxyOperation = mapOperationToProxy(apiServerUrl, operation);
+
       server.tool(
         operationId,
         description,
@@ -45,7 +67,7 @@ export function createMCPServer(
           });
           return {
             content: [
-              { type: "text", text: JSON.stringify(await mapOperationToProxy(apiServerUrl, operation)(params)) }
+              { type: "text", text: JSON.stringify(await proxyOperation(params)) }
             ]
           }
         }

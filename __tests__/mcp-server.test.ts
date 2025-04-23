@@ -1,6 +1,7 @@
 import { createMCPServer } from '../src/mcp-server';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Operation } from 'oas/operation';
+import { MediaTypeObject, OASDocument, OperationObject } from 'oas/types';
 
 jest.mock('@modelcontextprotocol/sdk/server/mcp.js');
 jest.mock('../src/proxy');
@@ -13,18 +14,20 @@ describe('MCP Server', () => {
     mockOperation = {
       getOperationId: () => 'testOperation',
       getDescription: () => 'Test description',
+      getSummary: () => 'Test summary',
+      getContentType: () => 'application/json',
+      isFormUrlEncoded: () => false,
       getParameters: () => [{
         name: 'param1',
         in: 'query',
         schema: { type: 'string' }
       }],
-      getSummary: () => 'Test summary',
-      getContentType: () => 'application/json',
-      isFormUrlEncoded: () => false,
+      getRequestBody: () => false,
+      getHeaders: () => ({ request: [], response: [] }),
       path: '/test',
       method: 'get',
-      api: {} as any,
-      schema: {} as any
+      api: {} as OASDocument,
+      schema: {} as OperationObject
     };
 
     (McpServer as jest.Mock).mockClear();
@@ -32,7 +35,7 @@ describe('MCP Server', () => {
 
   describe('createMCPServer', () => {
     it('should create an MCP server with correct configuration', () => {
-      const server = createMCPServer('http://api.example.com', [mockOperation as Operation]);
+      createMCPServer('http://api.example.com', [mockOperation as Operation]);
 
       expect(McpServer).toHaveBeenCalledWith(
         {
@@ -59,10 +62,21 @@ describe('MCP Server', () => {
       );
     });
 
-    it('should handle operations with no parameters', () => {
+    it('should handle operations with request body', () => {
+      const mockBody: MediaTypeObject = {
+        schema: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            status: { type: 'string' }
+          }
+        }
+      };
+
       mockOperation = {
         ...mockOperation,
-        getParameters: () => []
+        method: 'post',
+        getRequestBody: () => mockBody
       };
 
       const mockTool = jest.fn();
@@ -75,7 +89,58 @@ describe('MCP Server', () => {
       expect(mockTool).toHaveBeenCalledWith(
         'testOperation',
         'Test description',
-        {},
+        expect.objectContaining({
+          body: expect.any(Object)
+        }),
+        expect.any(Function)
+      );
+    });
+
+    it('should handle operations with custom headers', () => {
+      mockOperation = {
+        ...mockOperation,
+        getHeaders: () => ({
+          request: ['x-custom-header'],
+          response: []
+        })
+      };
+
+      const mockTool = jest.fn();
+      (McpServer as jest.Mock).mockImplementation(() => ({
+        tool: mockTool
+      }));
+
+      createMCPServer('http://api.example.com', [mockOperation as Operation]);
+
+      expect(mockTool).toHaveBeenCalledWith(
+        'testOperation',
+        'Test description',
+        expect.objectContaining({
+          headers: expect.any(Object)
+        }),
+        expect.any(Function)
+      );
+    });
+
+    it('should handle operations with no parameters', () => {
+      mockOperation = {
+        ...mockOperation,
+        getParameters: () => [],
+        getRequestBody: () => false,
+        getHeaders: () => ({ request: [], response: [] })
+      };
+
+      const mockTool = jest.fn();
+      (McpServer as jest.Mock).mockImplementation(() => ({
+        tool: mockTool
+      }));
+
+      createMCPServer('http://api.example.com', [mockOperation as Operation]);
+
+      expect(mockTool).toHaveBeenCalledWith(
+        'testOperation',
+        'Test description',
+        expect.objectContaining({ headers: expect.any(Object) }),
         expect.any(Function)
       );
     });

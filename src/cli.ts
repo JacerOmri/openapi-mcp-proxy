@@ -2,7 +2,7 @@
 import { Command } from 'commander';
 import { createMCPServer } from './mcp-server';
 import { createExpressServer } from './express';
-import { loadOpenAPIFile, extractGetOperations } from './openapi';
+import { loadOpenAPIFile, extractReadOperations, extractWriteOperations } from './openapi';
 import { createLogger } from './logger';
 
 const logger = createLogger('cli');
@@ -21,7 +21,10 @@ program
 
       const server = createMCPServer(
         options.target,
-        extractGetOperations(openAPI)
+        [
+          ...extractReadOperations(openAPI),
+          ...extractWriteOperations(openAPI)
+        ]
       );
 
       const app = createExpressServer(server);
@@ -32,11 +35,11 @@ program
         logger.info(`📄 Using OpenAPI spec from: ${options.spec}`);
         logger.info(`🎯 Proxying requests to: ${options.target}`);
 
-        logger.info('\nTo test the server:');
+        logger.info('To test the server:');
         logger.info('1. Install MCP Inspector: npm install -g @modelcontextprotocol/inspector');
         logger.info('2. In another terminal run: mcp-inspector');
         logger.info('3. Open VS Code and enable Copilot Agent Mode');
-        logger.info('\nPress Ctrl+C to stop the server');
+        logger.info('Press Ctrl+C to stop the server');
       });
     } catch (error) {
       logger.error({ error }, 'Error starting MCP server');
