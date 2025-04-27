@@ -35,6 +35,9 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.0.0
+      zod:
+        specifier: ^3.24.3
+        version: 3.24.3
     devDependencies:
       '@eslint/js':
         specifier: ^9.25.1
@@ -78,9 +81,6 @@ importers:
       typescript-eslint:
         specifier: ^8.31.0
         version: 8.31.0(eslint@9.25.1)(typescript@5.8.3)
-      zod:
-        specifier: ^3.24.3
-        version: 3.24.3
 
 packages:
 

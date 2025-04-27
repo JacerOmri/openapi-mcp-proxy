@@ -41,9 +41,9 @@ npx openapi-mcp-proxy --spec ./path/to/openapi.yml --target http://your-api.com 
 
 ### Options
 
-- `-s, --spec <path>` (required): Path to your OpenAPI specification file
-- `-t, --target <url>` (optional): Target URL of the API service (default: http://localhost:8080)
-- `-p, --port <number>` (optional): Port to run the MCP server on (default: 3000)
+- `-s, --spec <path>` (required): Path to your OpenAPI specification file (env: `OMP_OPENAPI_SPEC_FILE`)
+- `-t, --target <url>` (optional): Target URL of the API service (default: "http://localhost:8080", env:`OMP_TARGET_BASE_URL`)
+- `-p, --port <number>` (optional): Port to run the MCP server on (default: "3000", env: `PORT`)
 - `-V, --version`: Display version number
 - `-h, --help`: Display help for command
 

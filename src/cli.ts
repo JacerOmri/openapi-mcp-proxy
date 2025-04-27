@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import { createMCPServer } from './mcp-server';
 import { createExpressServer } from './express';
 import { loadOpenAPIFile, extractReadOperations, extractWriteOperations } from './openapi';
@@ -10,9 +10,21 @@ const program = new Command();
 
 program
   .description('Start an MCP server for an OpenAPI service')
-  .requiredOption('-s, --spec <path>', 'Path to OpenAPI specification file')
-  .option('-t, --target <url>', 'Target URL of the API service', 'http://localhost:8080')
-  .option('-p, --port <number>', 'Port to run the MCP server on', '3000')
+  .addOption(
+    new Option('-s, --spec <path>', 'Path to OpenAPI specification file')
+      .makeOptionMandatory(true)
+      .env('OMP_OPENAPI_SPEC_FILE')
+  )
+  .addOption(
+    new Option('-t, --target <url>', 'Target URL of the API service')
+      .default('http://localhost:8080')
+      .env('OMP_TARGET_BASE_URL')
+  )
+  .addOption(
+    new Option('-p, --port <number>', 'Port to run the MCP server on')
+      .default('3000')
+      .env('PORT')
+  )
   .action(async (options) => {
     try {
 
